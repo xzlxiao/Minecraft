@@ -1,3 +1,6 @@
+from __future__ import division
+
+import sys
 import math
 import random
 import time
@@ -29,6 +32,9 @@ JUMP_SPEED = math.sqrt(2 * GRAVITY * MAX_JUMP_HEIGHT)
 TERMINAL_VELOCITY = 50
 
 PLAYER_HEIGHT = 2
+
+if sys.version_info[0] >= 3:
+    xrange = range
 
 def cube_vertices(x, y, z, n):
     """ Return the vertices of the cube at position x, y, z with size 2*n.
@@ -116,7 +122,7 @@ def sectorize(position):
 
     """
     x, y, z = normalize(position)
-    x, y, z = x / SECTOR_SIZE, y / SECTOR_SIZE, z / SECTOR_SIZE
+    x, y, z = x // SECTOR_SIZE, y // SECTOR_SIZE, z // SECTOR_SIZE
     return (x, 0, z)
 
 
@@ -761,7 +767,7 @@ class Window(pyglet.window.Window):
         # reticle
         if self.reticle:
             self.reticle.delete()
-        x, y = self.width / 2, self.height / 2
+        x, y = self.width // 2, self.height // 2
         n = 10
         self.reticle = pyglet.graphics.vertex_list(4,
             ('v2i', (x - n, y, x + n, y, x, y - n, x, y + n))
@@ -773,10 +779,11 @@ class Window(pyglet.window.Window):
         """
         width, height = self.get_size()
         glDisable(GL_DEPTH_TEST)
-        glViewport(0, 0, width, height)
+        viewport = self.get_viewport_size()
+        glViewport(0, 0, max(1, viewport[0]), max(1, viewport[1]))
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        glOrtho(0, width, 0, height, -1, 1)
+        glOrtho(0, max(1, width), 0, max(1, height), -1, 1)
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
 
@@ -786,7 +793,8 @@ class Window(pyglet.window.Window):
         """
         width, height = self.get_size()
         glEnable(GL_DEPTH_TEST)
-        glViewport(0, 0, width, height)
+        viewport = self.get_viewport_size()
+        glViewport(0, 0, max(1, viewport[0]), max(1, viewport[1]))
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
         gluPerspective(65.0, width / float(height), 0.1, 60.0)
